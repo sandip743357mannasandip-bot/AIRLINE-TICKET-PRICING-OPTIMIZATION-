@@ -1,0 +1,428 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
+
+\onehalfspacing
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+
+{\Large \textbf{Indian Statistical Institute, Kolkata Centre}}\\[0.4cm]
+{\Large Bachelor of Statistics and Data Science (BSDS)}\\[1cm]
+
+\hrule
+\vspace{1cm}
+
+{\Huge \textbf{Airline Seat Pricing Optimization}}\\[0.3cm]
+{\Large Maximizing Expected Revenue under Demand Uncertainty}\\[1cm]
+
+\hrule
+\vspace{1.5cm}
+
+\begin{center}
+\textbf{Submitted by} \\
+Tenzing Shedup Bhutia (BSDCC2522) \\
+ Akshay Yenni (BSDCC2523) \\
+Sandip Manna (BSDCC2516)
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+\textbf{Course Instructor} \\
+Kaushik Jana
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+\textbf{Dataset Link:} \href{https://www.kaggle.com/datasets/umerabbasi658/data-train-xlsx?resource=download}{Kaggle Dataset} \\[0.2cm]
+\textbf{Github Repository: } \href{https://github.com/sandip743357mannasandip-bot/AIRLINE-TICKET-PRICING-OPTIMIZATION-}{Project Github Repository} \\[0.2cm]
+
+\end{center}
+
+\vfill
+
+{\large April 2026}
+
+\end{titlepage}
+
+\newpage
+
+\begin{abstract}
+This project studies airline ticket pricing using statistical modeling and optimization techniques under uncertain demand. Using historical flight data, relationships between ticket prices and influencing factors are analyzed and incorporated into a revenue-maximizing framework. The study follows the PPDAC cycle to ensure a structured and data-driven approach.
+\end{abstract}
+
+\section{Introduction}
+
+This project, \textit{“Airline Seat Pricing Optimization to Maximize Expected Revenue under Demand Uncertainty,”} focuses on developing a data-driven framework for optimal airline ticket pricing. The dataset consists of historical flight booking records, including features such as airline, route, travel dates and times, duration, number of stops, and the observed ticket prices. Collected from real-world booking platforms, the data reflects dynamic pricing influenced by demand, competition, and timing. The objective is to model the relationship between pricing and influencing factors, and to incorporate demand uncertainty into decision-making. Statistical techniques such as exploratory data analysis and regression modeling are used to capture these relationships. These models are then integrated into an optimization framework to maximize expected revenue. The study follows the structured PPDAC (Problem–Plan–Data–Analysis–Conclusion) cycle for systematic analysis and interpretation.
+
+\section{Problem (P)}
+\subsection{Problem Formulation under Demand Uncertainty}
+
+Airline pricing is a classical example of decision-making under uncertainty, where firms must set ticket prices before the actual passenger demand is realized. In practice, airlines rely on advance pricing strategies while demand remains uncertain due to factors such as seasonality, booking time, competition, and customer behavior. This creates a fundamental trade-off: setting prices too high may lead to unsold seats (spoilage of capacity), while setting prices too low can result in full occupancy but reduced revenue per seat.
+
+This problem is well studied in the field of revenue management, as discussed in foundational works such as \textit{The Theory of Revenue Management} by Talluri and Van Ryzin. Motivated by these real-world challenges, this project formulates airline pricing as a stochastic optimization problem.
+
+\textbf{Research Problem (RP):} \\
+Airlines must decide ticket prices before knowing exact demand. If prices are too high, seats may remain empty, whereas if prices are too low, potential revenue is lost despite high occupancy.
+
+\vspace{0.3cm}
+
+\textbf{Research Question (RQ):} \\
+What is the optimal ticket price that maximizes expected revenue under uncertain demand?
+
+\vspace{0.3cm}
+
+To address this question, let $p$ denote the ticket price and let $D(p)$ represent the random demand at price $p$. We assume that demand follows a probability distribution depending on price, for example:
+\[
+D(p) \sim \text{Poisson}(\lambda(p)) \quad \text{or} \quad D(p) \sim \mathcal{N}(\mu(p), \sigma^2),
+\]
+where $\lambda(p)$ or $\mu(p)$ is a decreasing function of price.
+
+Let $C$ denote the fixed seat capacity of the flight. Since actual sales cannot exceed capacity, the realized demand is $\min(D(p), C)$. Hence, the revenue function is:
+\[
+R(p) = p \cdot \min(D(p), C).
+\]
+
+The objective is to determine the optimal price $p$ that maximizes expected revenue:
+\[
+\max_{p} \; \mathbb{E}\big[ p \cdot \min(D(p), C) \big]
+\]
+subject to:
+\[
+p_{\min} \leq p \leq p_{\max},
+\]
+where $p_{\min}$ and $p_{\max}$ represent feasible pricing bounds.
+
+This formulation incorporates both uncertainty in demand and operational constraints such as limited seat capacity, making it a realistic and practical optimization framework. It provides the foundation for applying statistical estimation and numerical optimization techniques in subsequent sections.
+
+\section{Plan (P)}
+\subsection{Operational Plan and Link to Data}
+
+This section outlines how the optimization problem will be addressed using the available dataset. In the Problem section, demand was modeled as a random function of price, $D(p)$, which is not directly observed. Therefore, the key challenge is to approximate demand behavior using observable variables. The dataset consists of historical airline ticket listings, where price is influenced by factors such as airline, route, journey date, departure and arrival times, duration, and number of stops. Although direct demand data is unavailable, these variables act as proxies for underlying demand conditions, as airline pricing is typically responsive to demand patterns.
+
+The data used in this study is secondary in nature, obtained from an online flight booking platform covering domestic flights within India. It represents a large observational dataset rather than a probabilistic sample, as it is generated from available listings rather than a controlled sampling process. To address the research question, the approach involves: first, cleaning and exploring the dataset to identify pricing patterns; second, developing a statistical model relating price to observed features; third, using this model to infer demand behavior; and finally, incorporating this relationship into an optimization framework to determine the price that maximizes expected revenue under uncertainty..
+
+\section{Data (D)}
+\subsection{Data Description and Preprocessing}
+
+The dataset used in this study consists of historical airline ticket booking records collected from an online flight aggregation platform. It contains 10,683 observations and includes a combination of categorical, temporal, and numerical variables describing different aspects of flight journeys within India. The primary variable of interest is the ticket price, while the remaining variables act as explanatory factors influencing pricing decisions.
+
+\subsection{Description of Variables}
+
+The key variables in the dataset are described below:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+Variable & Description \\
+\hline
+Airline & Name of the airline carrier \\
+Source & Departure city \\
+Destination & Arrival city \\
+Route & Path taken by the flight \\
+Date\_of\_Journey & Date of travel \\
+Dep\_Time & Departure time \\
+Arrival\_Time & Arrival time \\
+Duration & Total travel time \\
+Total\_Stops & Number of stops in the journey \\
+Price & Ticket price (response variable) \\
+\hline
+\end{tabular}
+\caption{Description of variables in the dataset}
+\end{table}
+
+\subsection{Data Cleaning and Preparation}
+
+Since the dataset was obtained from an external source, several preprocessing steps were required to make it suitable for analysis.
+
+First, the dataset was examined for missing values. A small number of observations with missing or inconsistent route information were identified. These records were removed to maintain data consistency, as incomplete route information could affect the interpretation of travel patterns.
+
+Second, the \textit{Date\_of\_Journey} variable was converted into a standard date format. From this, additional features such as day and month were extracted to capture potential seasonal effects in pricing.
+
+Third, time-related variables such as \textit{Dep\_Time} and \textit{Arrival\_Time} were processed to ensure consistency in format. The \textit{Duration} variable, originally stored as a string, was converted into a numerical variable representing total travel time in minutes. This transformation was necessary for quantitative analysis and modeling.
+
+Categorical variables such as airline, source, and destination were checked for inconsistencies in naming and formatting. After verification, these variables were encoded appropriately for use in statistical models.
+
+The \textit{Route} variable required additional processing. Since it contained detailed path information, it was simplified to extract meaningful features such as the number of stops, which is already represented in the \textit{Total\_Stops} variable. This helped reduce redundancy and improve interpretability.
+
+Outliers in the \textit{Price} variable were examined carefully. Extremely high or low values were retained, as they represent genuine market conditions rather than data errors. Removing such observations could bias the analysis, particularly in understanding pricing variability.
+
+No arbitrary modifications were made to the data. All transformations were performed with the objective of improving data quality, consistency, and suitability for statistical analysis.
+
+\section{Analysis (A)}
+
+\subsection{Descriptive Statistics}
+
+The analysis begins with an exploration of the statistical properties of the dataset to understand pricing behavior and variability.
+
+\paragraph{Summary Statistics of Ticket Price}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l c}
+\hline
+Statistic & Value \\
+\hline
+Count & 10683 \\
+Mean & 9087.06 \\
+Standard Deviation & 4611.36 \\
+Minimum & 1759 \\
+25th Percentile & 5277 \\
+Median & 8372 \\
+75th Percentile & 12373 \\
+Maximum & 79512 \\
+\hline
+\end{tabular}
+\caption{Summary statistics of ticket price}
+\end{table}
+
+The summary statistics indicate substantial variability in ticket prices. The mean exceeding the median suggests a right-skewed distribution, indicating the presence of relatively high-priced tickets.
+
+\paragraph{Frequency Distribution of Airlines}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l c}
+\hline
+Airline & Frequency \\
+\hline
+Jet Airways & 3849 \\
+IndiGo & 2053 \\
+Air India & 1752 \\
+SpiceJet & 818 \\
+Vistara & 479 \\
+Others & Remaining \\
+\hline
+\end{tabular}
+\caption{Frequency distribution of major airlines}
+\end{table}
+
+The dataset is dominated by a few airlines, indicating concentration in specific market segments.
+
+\paragraph{Graphical Analysis}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\textwidth]{price_histogram.png}
+\caption{Distribution of ticket prices}
+\end{figure}
+
+The histogram shows a right-skewed distribution, with most ticket prices concentrated in the lower range.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{price_boxplot_airline.png}
+\caption{Ticket price distribution across airlines}
+\end{figure}
+
+The boxplot highlights differences in pricing across airlines, suggesting heterogeneity in pricing strategies.
+
+These observations motivate the need for a mathematical optimization framework.
+
+\subsection{Formulation of the Optimization Problem}
+
+Let:
+\begin{itemize}
+    \item $p \in [p_{\min}, p_{\max}]$ denote the ticket price (decision variable),
+    \item $X \in \mathbb{R}^k$ denote observed features (airline, route, duration, etc.),
+    \item $C$ denote the seat capacity,
+    \item $D(p,X)$ denote passenger demand.
+\end{itemize}
+
+The objective is to determine the optimal ticket price that maximizes expected revenue.
+
+\subsection{Modeling Demand as a Random Variable}
+
+Demand is inherently uncertain and is modeled as a random variable:
+
+\[
+D(p,X) = \lambda(p,X) + \varepsilon
+\]
+
+where
+
+\[
+\lambda(p,X) = \exp(\beta_0 + \beta^\top X - \alpha p), \quad \alpha > 0
+\]
+
+and
+
+\[
+\varepsilon \sim \mathcal{N}(0, \sigma^2).
+\]
+
+Thus,
+
+\[
+D(p,X) \sim \mathcal{N}(\lambda(p,X), \sigma^2).
+\]
+
+This ensures that demand decreases with price while incorporating uncertainty.
+
+\subsection{Expectation-Based Objective Function}
+
+Actual sales are limited by capacity:
+
+\[
+Q(p,X) = \min(D(p,X), C)
+\]
+
+Revenue is defined as:
+
+\[
+R(p,X) = p \cdot Q(p,X)
+\]
+
+The objective function is:
+
+\[
+\max_{p} \; \mathbb{E}[R(p,X)] = \mathbb{E}\left[p \cdot \min(D(p,X), C)\right]
+\]
+
+\subsection{Optimization Problem and Approximation}
+
+To obtain a tractable formulation:
+
+\[
+\mathbb{E}[\min(D,C)] \approx \min(\mathbb{E}[D], C)
+\]
+
+Thus, the optimization problem becomes:
+
+\[
+\max_{p \in [p_{\min}, p_{\max}]} \; f(p) = p \cdot \min\left(\exp(\beta_0 + \beta^\top X - \alpha p), C \right)
+\]
+
+\subsection{Convex Optimization and Analytical Solution}
+
+Let $A = \exp(\beta_0 + \beta^\top X)$.
+
+\textbf{Case 1: $\lambda(p,X) \le C$}
+
+\[
+f(p) = p A e^{-\alpha p}
+\]
+
+\[
+f'(p) = A e^{-\alpha p}(1 - \alpha p)
+\]
+
+\[
+p^* = \frac{1}{\alpha}
+\]
+
+\[
+f''(p) < 0 \Rightarrow \text{concave function}
+\]
+
+\textbf{Case 2: $\lambda(p,X) > C$}
+
+\[
+f(p) = pC \Rightarrow p^* = p_{\max}
+\]
+
+Since the objective function is concave, a unique global optimum exists.
+
+This allows the use of optimization techniques such as ,Newton's method
+
+
+
+Recall our objective (Case 1, where demand $<$ capacity):
+\[
+f(p) = p \cdot A e^{-\alpha p}
+\]
+where $A = \exp(\beta_0 + \beta^\top X)$.
+
+Since we want to \textbf{maximize} $f(p)$, Newton's method is applied to 
+$f'(p) = 0$ (finding the root of the first derivative).
+
+\subsection*{First Derivative $f'(p)$}
+
+Using the product rule on $p \cdot Ae^{-\alpha p}$:
+\[
+f'(p) = Ae^{-\alpha p} + p \cdot Ae^{-\alpha p} \cdot (-\alpha)
+\]
+\[
+f'(p) = Ae^{-\alpha p}(1 - \alpha p)
+\]
+
+\subsection*{Second Derivative $f''(p)$}
+
+Differentiating $f'(p) = Ae^{-\alpha p}(1 - \alpha p)$ again using the product rule:
+\[
+f''(p) = Ae^{-\alpha p}(-\alpha)(1 - \alpha p) + Ae^{-\alpha p}(-\alpha)
+\]
+\[
+f''(p) = Ae^{-\alpha p}\Big(-\alpha(1 - \alpha p) - \alpha\Big)
+\]
+\[
+f''(p) = Ae^{-\alpha p}\Big(\alpha^2 p - 2\alpha\Big)
+\]
+\[
+f''(p) = \alpha A e^{-\alpha p}(\alpha p - 2)
+\]
+
+\subsection*{Newton's Update Rule}
+
+Newton's method finds the root of $f'(p) = 0$ iteratively:
+\[
+p_{n+1} = p_n - \frac{f'(p_n)}{f''(p_n)}
+\]
+
+Substituting:
+\[
+p_{n+1} = p_n - \frac{Ae^{-\alpha p_n}(1 - \alpha p_n)}{\alpha A e^{-\alpha p_n}(\alpha p_n - 2)}
+\]
+
+The $Ae^{-\alpha p}$ terms cancel out:
+\[
+\boxed{p_{n+1} = p_n - \frac{1 - \alpha p_n}{\alpha(\alpha p_n - 2)}}
+\]
+
+This is the clean Newton update — no exponentials needed at all!
+
+\subsection*{Convergence Check}
+
+At the true optimum $p^* = \frac{1}{\alpha}$:
+
+\begin{itemize}
+\item $f'(p^*) = Ae^{-1}(1 - \alpha \cdot \frac{1}{\alpha}) = \mathbf{0}$
+\item $f''(p^*) = \alpha A e^{-1}(1 - 2) = -\alpha A e^{-1} < 0$ \quad (confirms maximum)
+\end{itemize}
+
+\subsection{Discussion of Findings}
+
+The analysis shows that optimal pricing is determined by the trade-off between price and demand, with the optimal price being inversely related to the price sensitivity parameter $\alpha$. This implies that higher customer sensitivity leads to lower optimal prices, emphasizing the importance of accurately estimating demand response. The descriptive analysis revealed significant variability and right-skewness in ticket prices, along with differences across airlines, indicating that pricing behavior is influenced by multiple structural factors. Capacity constraints introduce nonlinear effects, resulting in different pricing regimes depending on whether demand exceeds available seats. These findings suggest that pricing strategies should be adaptive and tailored to specific market segments rather than uniform across all flights.
+
+Despite these insights, the analysis has certain limitations. Demand was not directly observed and had to be modeled using simplifying assumptions, and the framework does not account for dynamic pricing or competitive market behavior. These limitations may affect the precision of the results. Future work can improve the model by incorporating real-time demand estimation, dynamic pricing strategies, and more flexible modeling approaches. Such extensions would enhance the robustness and applicability of the framework, leading to more realistic and effective airline pricing decisions.
+
+\section{Conclusion and Communication (C)}
+
+This study analyzed airline ticket pricing using a statistical and optimization-based framework. The results show that ticket prices vary significantly across airlines and routes, and that optimal pricing depends on balancing price and demand rather than simply increasing fares. The mathematical model highlights the role of price sensitivity in determining optimal pricing, with higher sensitivity leading to lower optimal prices. These findings suggest that data-driven pricing strategies can improve revenue outcomes.
+
+A key insight from the analysis is that pricing strategies should be adaptive and tailored to different market segments. The model provides a structured way to understand how demand responds to price and how capacity constraints influence revenue. This leads to new ideas such as incorporating route-specific pricing, segment-based strategies, and more flexible pricing mechanisms. Overall, the framework demonstrates how combining statistical analysis with optimization can guide practical decision-making in airline pricing.
+
+However, the study has important limitations. Demand was not directly observed and had to be modeled using assumptions, and the framework does not account for dynamic pricing or competitive effects. These limitations may affect the accuracy of the results. Future work can address these issues by incorporating real-time demand data, advanced machine learning models, and dynamic pricing strategies, leading to more robust and realistic optimization models.
+
+\section{References}
+
+\begin{enumerate}
+
+\item Airline Ticket Price Dataset, Kaggle. Available at: \href{https://www.kaggle.com/datasets/umerabbasi658/data-train-xlsx?resource=download}{Kaggle Dataset}
+\item The Code For Optimization.Available at:
+\href{https://github.com/sandip743357mannasandip-bot/AIRLINE-TICKET-PRICING-OPTIMIZATION-/blob/main/optimization.py}{Code}
+\section{Individual contribution}
+Tenzing Shedup Bhutia identified the dataset and carried out the main analysis, including formulating the multivariate linear regression and developing the modeling framework. Sandip Manna implemented the optimization component in Python. Yenni Akshay organized the analysis into a Latex report, contributed to data visualization through plots, and documented key descriptive statistics such as mean and standard deviation.
+\end{enumerate}
+
+\end{document}
